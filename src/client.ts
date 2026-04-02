@@ -1,7 +1,10 @@
+import "dotenv/config"
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { select, input } from "@inquirer/prompts";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText } from 'ai';
 
 
 const mcp = new Client(
@@ -20,6 +23,10 @@ const transport = new StdioClientTransport(
     stderr: "ignore"
   }
 )
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_API_KEY
+})
 
 async function main() {
   await mcp.connect(transport)
@@ -75,5 +82,11 @@ async function handleTool(tool: Tool) {
   console.log((res.content as [{ text: string }])[0].text)
 }
 
+const { text } = await generateText({
+  model: google('gemini-2.5-flash'),
+  prompt: "what is the regex for a basic SQL injection?"
+})
+
+console.log(text)
 
 main()
